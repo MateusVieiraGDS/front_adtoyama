@@ -1,10 +1,10 @@
-import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Slide, TextField, Typography } from "@mui/material";
+import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Grow, Radio, RadioGroup, Slide, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import ImagemCropUplaod from "../../helpers/ImagemCropUplaod";
-import { sa_getCongregacoes } from "../../../app/actions/helpers";
+import { sa_getCongregacoes, sa_getGrupos } from "../../../app/actions/helpers";
 
 export default function FormCongregacaoBatismo({data, setData}) {
     const [dataForm, setDataForm] = useState(data ?? {
@@ -12,11 +12,13 @@ export default function FormCongregacaoBatismo({data, setData}) {
         localBatismo: '',
         minisAnt: '',
         congregacao: '',
+        grupo: '',
         certBatFile: null
     });
 
     const [rdLocalBatismo, setRdLocalBatismo] = useState(true);
     const [congregacoes, setCongregacoes] = useState([]);
+    const [grupos, setGrupos] = useState([]);
 
     useEffect(() => {
         setData(dataForm);
@@ -24,8 +26,10 @@ export default function FormCongregacaoBatismo({data, setData}) {
 
     useEffect(() => {        
         (async ()=>{
-            let response = await sa_getCongregacoes();
-            setCongregacoes(response.data.map(m => ({'label': m.nome, 'id': m.id})));
+            let responseCongregacoes = await sa_getCongregacoes();
+            let responseGrupos = await sa_getGrupos();
+            setCongregacoes(responseCongregacoes.data.map(m => ({'label': m.nome, 'id': m.id})));
+            setGrupos(responseGrupos.data.map(m => ({'label': m.nome, 'id': m.id})));
         })();
     }, []);
 
@@ -62,7 +66,6 @@ export default function FormCongregacaoBatismo({data, setData}) {
     }
 
     const handleDatePickOnChange = (e) => {
-        console.log();
         setDataForm((prevData) => ({
             ...prevData,
             ['dataBatismo']: e.format('DD/MM/YYYY'),
@@ -76,11 +79,23 @@ export default function FormCongregacaoBatismo({data, setData}) {
         }));
     }
 
+    const handleChangeGrupos = (e, o) => {
+        setDataForm((prevData) => ({
+            ...prevData,
+            grupo: o?.id ?? '',
+        }));
+    }
+
     return ( 
-        <Slide in={true} direction="left">
+        <Grow in={true} direction="left">
             <FormControl sx={{width: '100%'}}>
-                    <Grid container spacing={2} columns={12} sx={{width: '100%'}}> 
-                        <Grid item xs={12} md={7}>
+                    <Grid container spacing={2} columns={11} sx={{width: '100%'}}>
+                        <Grid item xs={12} md={12}>
+                            <Typography variant="span" gutterBottom>
+                                Sobre Congregação e Grupo
+                            </Typography>
+                        </Grid> 
+                        <Grid item xs={12} md={6}>
                             <Autocomplete
                             disablePortal
                             id="combo-box-demo"
@@ -90,9 +105,20 @@ export default function FormCongregacaoBatismo({data, setData}) {
                             value={congregacoes.length > 0 ? congregacoes.find(c => c.id == dataForm.congregacao) ?? '': ''}
                             renderInput={(params) => <TextField {...params} label="Congregação á se membrar" fullWidth name="congregacao"/>}                        
                             />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Autocomplete
+                            disablePortal
+                            id="combo-box-demo"
+                            options={grupos}
+                            sx={{ width: '100%' }}
+                            onChange={handleChangeGrupos}
+                            value={grupos.length > 0 ? grupos.find(c => c.id == dataForm.grupo) ?? '': ''}
+                            renderInput={(params) => <TextField {...params} label="Grupo a se unir" fullWidth name="grupo"/>}                        
+                            />
                         </Grid>   
                         <Grid item xs={8} md={6}>                            
-                            <TextField id="outlined-basic" label="Nome do ministério Anterior" variant="outlined"fullWidth name="minisAnt" onChange={handleOnChange} value={dataForm.minisAnt}/>
+                            <TextField id="outlined-basic" label="Ministério Anterior (Caso se aplique)" variant="outlined"fullWidth name="minisAnt" onChange={handleOnChange} value={dataForm.minisAnt}/>
                         </Grid>
                         <Grid item xs={12} md={12}>
                             <Typography variant="span" gutterBottom>
@@ -122,13 +148,13 @@ export default function FormCongregacaoBatismo({data, setData}) {
                                     <TextField required id="outlined-basic" label="Ministério de Batismo" variant="outlined"fullWidth name="localBatismo" onChange={handleOnChange} value={dataForm.localBatismo}/>
                                 </Grid>
                                 <Grid item md={10} xs={12}>
-                                    <FormLabel id="demo-row-radio-buttons-group-label">Foto de Certificado</FormLabel>
+                                    <FormLabel id="demo-row-radio-buttons-group-label">Foto do Certificado</FormLabel>
                                     <ImagemCropUplaod images={dataForm.certBatFile != null ? [dataForm.certBatFile] : []} setImages={handleChangeImage}/>
                                 </Grid>
                             </>
                         }                        
                     </Grid> 
             </FormControl>
-        </Slide>
+        </Grow>
      );
 }

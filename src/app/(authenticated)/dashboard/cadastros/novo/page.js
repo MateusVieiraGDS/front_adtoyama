@@ -10,13 +10,14 @@ import FormCongregacaoBatismo from '../../../../../components/dashboard/cadastro
 import FormEnderecoContato from '../../../../../components/dashboard/cadastros/FormEnderecoContato';
 import FormConsagracao from '../../../../../components/dashboard/cadastros/FormConsagracao';
 import FormFinalizacao from '../../../../../components/dashboard/cadastros/FormFinalizacao';
-import { Button } from '@mui/material';
+import { Button, Divider, Stack } from '@mui/material';
+import { ArrowBackOutlined, ArrowCircleLeft, ArrowCircleRight, ArrowForwardOutlined } from '@mui/icons-material';
 
 
 const getUrlHashValue = () =>{
     const hash = window.location.hash.slice(1);
     const index = parseInt(hash, 10);
-    return index ?? 0;
+    return isNaN(index) ? 0 : index;
 }
 
 export default function CadastroForm() {
@@ -34,7 +35,10 @@ export default function CadastroForm() {
             rgUf: '',
             estado: '',
             cidade: '',
-            imageFile: null
+            nomeMae: '',
+            nomePai: '',
+            imageFileDoc: null,
+            imageFileNasc: null
         },
         dadosEnderecoContato: {
             rua: '',
@@ -43,22 +47,27 @@ export default function CadastroForm() {
             cidade: '',
             uf: '',
             complemento: '',
-            cep: ''
+            cep: '',
+            email: '',
+            telefone: ''
         },
         dadosCongregacaoBatismo: {
             dataBatismo: '',
             localBatismo: '',
-            imageCertBat: '',
             minisAnt: '',
+            congregacao: '',
+            grupo: '',
+            certBatFile: null
         },
         dadosConsagracao: []
     });    
 
     const dataRequired = {
-        dadosPessoais: ['nome', 'dataNasc', 'cpf', 'rg', 'rgUf', 'estado', 'cidade', 'imageFile'],
-        dadosEnderecoContato: ['rua', 'numero', 'bairro', 'cidade', 'uf', 'cep'],
-        dadosCongregacaoBatismo: [],
-        dadosConsagracao: []
+        dadosPessoais: ['nome', 'dataNasc', 'cpf', 'rg', 'rgUf', 'estado', 'cidade', 'imageFileDoc'],
+        dadosEnderecoContato: ['rua', 'numero', 'bairro', 'cidade', 'uf', 'cep', 'email', 'telefone'],
+        dadosCongregacaoBatismo: ['dataBatismo', 'localBatismo', 'congregacao'],
+        dadosConsagracao: [],
+        dadosFinalizacao: []
     }
     
     useEffect(() => {
@@ -108,10 +117,8 @@ export default function CadastroForm() {
             let complete = true;
             dataRequired[dataId].forEach(dr =>{
                 let temp_value = new_data[dataId][dr];
-                if(temp_value == '' || temp_value == null || temp_value == undefined){
-                    console.log("STATE:" + dr);
+                if(temp_value == '' || temp_value == null || temp_value == undefined)
                     complete = false;
-                }
             });
             setCompleteStepsStates((prevState) => {
                 const novoArray = [...prevState];
@@ -127,7 +134,7 @@ export default function CadastroForm() {
         {label: 'Endereço e Contato', component: <FormEnderecoContato data={dataPayload.dadosEnderecoContato} setData={d => handleSetData(d, 'dadosEnderecoContato')}></FormEnderecoContato>},
         {label: 'Batismo e Congregação', component: <FormCongregacaoBatismo data={dataPayload.dadosCongregacaoBatismo} setData={d => handleSetData(d, 'dadosCongregacaoBatismo')}></FormCongregacaoBatismo>},
         {label: 'Consagrações', component: <FormConsagracao data={dataPayload.dadosConsagracao} setData={d => handleSetData(d, 'dadosConsagracao')}></FormConsagracao>},
-        {label: 'Finalização', component: <FormFinalizacao></FormFinalizacao>}
+        {label: 'Finalização', component: <FormFinalizacao data={dataPayload} completeStatus={completeStepsState}></FormFinalizacao>}
     ];
 
     
@@ -145,8 +152,22 @@ export default function CadastroForm() {
                 </Step>
                 ))}
             </Stepper> 
-            <Button onClick={backStep}>Voltar</Button>  
-            <Button onClick={nextStep}>Proximo</Button>  
+            <Stack 
+                direction='row' justifyContent='center' alignContent='center'
+                sx={{
+                    width: '100%',
+                    margin: '.5em 0',
+                    '& button': {
+                        width: '12em',
+                        height: '1.7em',
+                        margin: '0 .5em'
+                    }
+                }} 
+            >
+                <Button onClick={backStep} variant='contained' color='info' startIcon={<ArrowBackOutlined/>} sx={{borderRadius: '5em 0 0 5em'}}>Voltar</Button>  
+                <Button onClick={nextStep} variant='contained' color='primary' endIcon={<ArrowForwardOutlined/>} sx={{borderRadius: '0 5em 5em 0'}}>Proximo</Button> 
+            </Stack> 
+            <Divider/>
             <Box sx={{
                 marginTop: '1em'
             }}>

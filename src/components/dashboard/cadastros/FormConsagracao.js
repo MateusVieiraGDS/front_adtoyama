@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, FormControl, FormControlLabel, FormLabel, Grid, IconButton, Paper, Radio, RadioGroup, Slide, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, FormControl, FormControlLabel, FormLabel, Grid, Grow, IconButton, Paper, Radio, RadioGroup, Slide, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { sa_getCargos } from "../../../app/actions/helpers";
 import ImagemCropUplaod from "../../helpers/ImagemCropUplaod";
@@ -11,8 +11,17 @@ export default function FormConsagracao({data, setData}) {
     const [cargosPossiveis, setCargosPossiveis] = useState([]);
     const [consagracoes, setConsagracoes] = useState(data??[]);
 
+    const isCompleteCargo = (c) => {
+        return (
+            c.cargoId != '' 
+            && c.dataCon != '' 
+            && c.ministerio != '' 
+            && (c.ministerio == 'self' || c.certConFile != null)
+        );
+    }
+
     useEffect(() => {
-        setData(consagracoes);
+        setData(consagracoes.filter(f => isCompleteCargo(f)));
     }, [consagracoes]);
 
     useEffect(() => {        
@@ -79,7 +88,7 @@ export default function FormConsagracao({data, setData}) {
     }
 
     return ( 
-        <Slide in={true} direction="left">
+        <Grow in={true} direction="left">
             <FormControl sx={{width: '100%'}}>
                     <Typography variant="span" gutterBottom>
                         Insira os cargos
@@ -129,7 +138,7 @@ export default function FormConsagracao({data, setData}) {
                                     </Grid>
                                     <Grid item xs={6} md={4}>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker sx={{ width: '100%' }} label="Data de Batismo" onChange={(dt) => {handleDatePickOnChange(index, dt)}} name="dataBatismo" value={dayjs(consagracoes[index].dataCon, 'DD/MM/YYYY')}/>
+                                            <DatePicker sx={{ width: '100%' }} label="Data de Consagração" onChange={(dt) => {handleDatePickOnChange(index, dt)}} name="dataBatismo" value={dayjs(consagracoes[index].dataCon, 'DD/MM/YYYY')}/>
                                         </LocalizationProvider>
                                     </Grid> 
                                     {consagracoes[index].ministerio != 'self' &&
@@ -148,6 +157,6 @@ export default function FormConsagracao({data, setData}) {
                         )}
                     </Box>                     
             </FormControl>
-        </Slide>
+        </Grow>
      );
 }

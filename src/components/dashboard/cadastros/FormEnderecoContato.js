@@ -1,4 +1,4 @@
-import { Autocomplete, FormControl, Grid, Slide, TextField, Typography } from "@mui/material";
+import { Autocomplete, FormControl, Grid, Grow, Slide, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { sa_getStateAndCities } from "../../../app/actions/helpers";
 import ReactInputMask from "react-input-mask";
@@ -30,9 +30,8 @@ export default function FormEnderecoContato({data, setData}) {
     useEffect(() => {        
         (async ()=>{
             let response = await sa_getStateAndCities(); 
-            console.log(response.data.time);
             let temp_states = [];
-            response.data.data.map((st => {
+            response.data.map((st => {
                 temp_states[st.uf] = st['cities'].map(ct => ct.name);
             }))
             setStatesAndCities(temp_states);
@@ -109,8 +108,7 @@ export default function FormEnderecoContato({data, setData}) {
             handleSearchAddressByCep(valueNumber);
         }
         else{            
-            if(addressFound){  
-                console.log('teste');              
+            if(addressFound){            
                 setDataForm((prevData) => ({
                     ...prevData,
                     ...{
@@ -136,7 +134,7 @@ export default function FormEnderecoContato({data, setData}) {
 
 
     return ( 
-        <Slide in={true} direction="left">
+        <Grow in={true} direction="left">
             <FormControl>
                     <Grid container spacing={2} columns={11}>                        
                         <Grid item xs={12} md={12}>
@@ -209,6 +207,6 @@ export default function FormEnderecoContato({data, setData}) {
                         </Grid>    
                     </Grid> 
             </FormControl>
-        </Slide>
+        </Grow>
      );
 }
