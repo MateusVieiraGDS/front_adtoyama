@@ -1,0 +1,14 @@
+.dropIcon {
+    font-size: 4.5em;
+    animation: paste-icon-keyf-in 200ms linear, paste-icon-keyf-inf 200ms linear 200ms infinite alternate;
+} 
+
+@keyframes paste-icon-keyf-in {
+    from {font-size: 1em;}
+    to {font-size: 4.5em;}
+}
+
+@keyframes paste-icon-keyf-inf {
+    from {scale: 1;}
+    to {scale: 1.2;}
+}

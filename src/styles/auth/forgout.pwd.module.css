@@ -1,0 +1,54 @@
+.body_login{
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url('../../../public/back.jpg');
+    animation: infinite 50s alternate-reverse linear;
+    animation-name: body_login_animation;
+    background-color: #4b4b4b;
+    background-blend-mode: overlay;
+}
+
+@keyframes body_login_animation {
+    from {background-position-x: 0%;}
+    to {background-position-x: 51%;}
+}
+
+.ad_logo{
+    box-shadow: black 0 0 .5em;
+    width: 8em;
+    height: 8em;
+    border-radius: 100%;
+    overflow: hidden;
+}
+.ad_logo img{
+    width: 8em;
+    height: 8em;
+}
+
+.input_code{
+    text-align: center;
+}
+
+.input_code input{
+    width: 6em;
+    border: none;
+    height: 0.9em;
+    font-family: consolas;
+    letter-spacing: .2em;
+    font-size: 1.8em;
+    outline: none;
+    background: none;
+    font-family: consolas;
+    display: inline-block;
+    text-align: center;
+    box-shadow: inset rgba(90, 90, 90, 0.692) 0 0 .3em;
+    padding: .4em 0;
+}
+
+
+.input_code label{
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
