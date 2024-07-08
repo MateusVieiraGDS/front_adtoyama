@@ -8,11 +8,8 @@ import { cookies, headers } from "next/headers";
 export default async function Authenticated({children}) {
     let user = null;
     let userResponse = await sa_getUser();
-    console.log("IP-SA: " + headers().get('x-forwarded-for'));
     if(userResponse.success)
         user = userResponse.data;
-
-    console.log(userResponse.success);
     return ( 
         <>
             {user ? 

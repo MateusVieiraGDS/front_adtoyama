@@ -5,7 +5,7 @@ import Dropzone from '../../components/helpers/Dropzone.js'
 import Cropper, { ReactCropperElement } from "react-cropper";
 import "cropperjs/dist/cropper.css"
 
-const ImagemCropUplaod = ({images = [], setImages = null, maxImages = 1}) => {
+const ImagemCropUplaod = ({images = [], setImages = null, maxImages = 1, initialAspectRatio = 16 / 9}) => {
     const [crooperShow, setCropperShow] = useState(false);
     const cropperRef = useRef(null);
     const [imageList, setImageList] = useState(images??[]);
@@ -119,7 +119,7 @@ const ImagemCropUplaod = ({images = [], setImages = null, maxImages = 1}) => {
                         src={croppingImageUrl}
                         style={{ height: 350, width: "100%" }}
                         // Cropper.js options
-                        initialAspectRatio={16 / 9}
+                        initialAspectRatio={initialAspectRatio}
                         guides={true}
                         ref={cropperRef}
                         rotatable={true}

@@ -28,16 +28,20 @@ export const fetchApi = async (url: string, options: RequestInit): Promise<Parti
     });
 
     let jsonResponse: object = null;
+    var response: Response = null;
     try {
-        let response: Response = await fetch(url_final.href, {
+        response = await fetch(url_final.href, {
             ...options,
             headers: payload_headers
         });
-        jsonResponse = await response.json();
+        jsonResponse = await response.json();  
         if(!response.ok)
             return ParameterizeResponse(false, refactorLaravelError(jsonResponse['errors']));
     } catch (error) {
-        return ParameterizeResponse(false, {"ServerError": `${error?.cause?.errno} | ${error?.cause?.code}`});
+        let er = `${error?.cause?.errno} | ${error?.cause?.code}`;
+        if(!response.ok)
+            er = `API | ${response?.statusText}`;
+        return ParameterizeResponse(false, {"ServerError": er});
     }    
 
     return ParameterizeResponse(true, jsonResponse);

@@ -10,9 +10,17 @@ import FormCongregacaoBatismo from '../../../../../components/dashboard/cadastro
 import FormEnderecoContato from '../../../../../components/dashboard/cadastros/FormEnderecoContato';
 import FormConsagracao from '../../../../../components/dashboard/cadastros/FormConsagracao';
 import FormFinalizacao from '../../../../../components/dashboard/cadastros/FormFinalizacao';
-import { Button, Divider, Stack } from '@mui/material';
+import { Button, Divider, Stack, ThemeProvider, createTheme } from '@mui/material';
 import { ArrowBackOutlined, ArrowCircleLeft, ArrowCircleRight, ArrowForwardOutlined } from '@mui/icons-material';
+import { ptBR } from '@mui/x-date-pickers';
+import { toast } from 'react-toastify';
+import { sa_uploadCadastro } from '../../../../actions/cadastro';
+import ObjetcToFormData from '../../../../../helpers/ObjetcToFormData'
 
+
+const themeDatePick = createTheme(
+    ptBR, // x-data-grid translations
+);
 
 const getUrlHashValue = () =>{
     const hash = window.location.hash.slice(1);
@@ -20,16 +28,16 @@ const getUrlHashValue = () =>{
     return isNaN(index) ? 0 : index;
 }
 
-export default function CadastroForm() {
+export default function CadastroForm() {  
     console.warn = () => {};
-    
     const [activeStep, setActiveStep] = useState(getUrlHashValue());
-    const [completeStepsState, setCompleteStepsStates] = useState([false, false, false, false, false]);
+    const [completeStepsState, setCompleteStepsStates] = useState([false, false, false, false, true]);
 
     const [dataPayload, setDataPayload] = useState({
         dadosPessoais: {
             nome: '',
             dataNasc: '',
+            sexo: '',
             cpf: '',
             rg: '',
             rgUf: '',
@@ -38,7 +46,10 @@ export default function CadastroForm() {
             nomeMae: '',
             nomePai: '',
             imageFileDoc: null,
-            imageFileNasc: null
+            imageFileNasc: null,
+            imageFileCas: null,
+            imageFileDiv: null,
+            imageFileObt: null
         },
         dadosEnderecoContato: {
             rua: '',
@@ -63,7 +74,7 @@ export default function CadastroForm() {
     });    
 
     const dataRequired = {
-        dadosPessoais: ['nome', 'dataNasc', 'cpf', 'rg', 'rgUf', 'estado', 'cidade', 'imageFileDoc'],
+        dadosPessoais: ['nome', 'dataNasc', 'sexo', 'cpf', 'rg', 'rgUf', 'estado', 'cidade', 'imageFileDoc'],
         dadosEnderecoContato: ['rua', 'numero', 'bairro', 'cidade', 'uf', 'cep', 'email', 'telefone'],
         dadosCongregacaoBatismo: ['dataBatismo', 'localBatismo', 'congregacao'],
         dadosConsagracao: [],
@@ -71,8 +82,6 @@ export default function CadastroForm() {
     }
     
     useEffect(() => {
-        console.log(dataPayload);
-        console.log(completeStepsState);
     }, [dataPayload]);
 
     useEffect(() => {
@@ -128,17 +137,25 @@ export default function CadastroForm() {
             return new_data;
         });
     }
+    
+
+    const handleUpload = async () => {
+        if(completeStepsState.find(f => f == false) != null){
+            toast('Preencha todos os dados obrigatórios para finalizar o cadastro', {type: 'error'});
+            return;
+        }
+        let response = await sa_uploadCadastro(ObjetcToFormData(dataPayload));
+    }
 
     const steps = [
         {label: 'Dados Pessoais', component: <FormDadosPessoais data={dataPayload.dadosPessoais} setData={d => handleSetData(d, 'dadosPessoais')}></FormDadosPessoais>},
         {label: 'Endereço e Contato', component: <FormEnderecoContato data={dataPayload.dadosEnderecoContato} setData={d => handleSetData(d, 'dadosEnderecoContato')}></FormEnderecoContato>},
         {label: 'Batismo e Congregação', component: <FormCongregacaoBatismo data={dataPayload.dadosCongregacaoBatismo} setData={d => handleSetData(d, 'dadosCongregacaoBatismo')}></FormCongregacaoBatismo>},
         {label: 'Consagrações', component: <FormConsagracao data={dataPayload.dadosConsagracao} setData={d => handleSetData(d, 'dadosConsagracao')}></FormConsagracao>},
-        {label: 'Finalização', component: <FormFinalizacao data={dataPayload} completeStatus={completeStepsState}></FormFinalizacao>}
+        {label: 'Finalização', component: <FormFinalizacao data={dataPayload} completeStatus={completeStepsState} onUpload={handleUpload}></FormFinalizacao>}
     ];
 
-    
-
+        
     return ( 
         <>
             <Stepper activeStep={activeStep} alternativeLabel>
@@ -171,7 +188,9 @@ export default function CadastroForm() {
             <Box sx={{
                 marginTop: '1em'
             }}>
-                {steps[activeStep].component}
+                <ThemeProvider theme={themeDatePick}>
+                    {steps[activeStep].component}
+                </ThemeProvider>
             </Box>                    
         </>
      );

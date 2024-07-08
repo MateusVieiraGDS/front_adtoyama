@@ -2,7 +2,7 @@
 
 //import theme from "@/Layouts/Admin/Default/themes/default";
 import { Box, Button, Grid, InputAdornment, Link, Paper, TextField, ThemeProvider, Tooltip, Typography, createTheme } from "@mui/material";
-import { DataGrid, GridNoRowsOverlay, GridToolbar, ptBR } from "@mui/x-data-grid";
+import { DataGrid, GridNoRowsOverlay, GridToolbar, ptBR as dt_grid_ptBR} from "@mui/x-data-grid";
 import ReactInputMask from "react-input-mask";
 import AddIcon from '@mui/icons-material/Add';
 //import { useForm } from "@inertiajs/react";
@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 
 
 const themeDataGrid = createTheme(
-    ptBR, // x-data-grid translations
+  dt_grid_ptBR, // x-data-grid translations
 );
 
 

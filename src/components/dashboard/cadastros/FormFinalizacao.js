@@ -1,30 +1,38 @@
-import { Alert, Box, FormControl, Grid, Grow, Paper, Slide, Typography } from "@mui/material";
+import { Alert, Box, Button, Divider, FormControl, Grid, Grow, Paper, Slide, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { sa_getCargos, sa_getCongregacoes, sa_getGrupos } from "../../../app/actions/helpers";
 
-export default function FormFinalizacao({data, completeStatus}) {
+export default function FormFinalizacao({data, completeStatus, onUpload}) {
     const [congregacoes, setCongregacoes] = useState([]);
     const [grupos, setGrupos] = useState([]);
     const [cargosPossiveis, setCargosPossiveis] = useState([]);
+    const [preview34, setPreview34] = useState(null);
 
-    useEffect(() => {        
+    useEffect(() => {             
+        (async ()=>{
+            if(data.dadosPessoais.imageFile34 != null){
+                const reader = new FileReader();
+                reader.onloadend = (e) => setPreview34(e.target.result);     
+                reader.readAsDataURL(data.dadosPessoais.imageFile34);
+            }
+        })();
         (async ()=>{
             let responseCargos = await sa_getCargos();            
-            let responseCongregacoes = await sa_getCongregacoes();
-            let responseGrupos = await sa_getGrupos();
-            setCongregacoes(responseCongregacoes.data.map(m => ({'label': m.nome, 'id': m.id})));
-            setGrupos(responseGrupos.data.map(m => ({'label': m.nome, 'id': m.id})));
             setCargosPossiveis(responseCargos.data.map(m => ({'label': m.nome, 'id': m.id})));
+        })();
+        (async ()=>{        
+            let responseCongregacoes = await sa_getCongregacoes();
+            setCongregacoes(responseCongregacoes.data.map(m => ({'label': m.nome, 'id': m.id})));
+        })();
+        (async ()=>{
+            let responseGrupos = await sa_getGrupos();
+            setGrupos(responseGrupos.data.map(m => ({'label': m.nome, 'id': m.id})));
         })();
     }, []);
 
     const getUncompleteSteps = () => {
         const labels = ['Dados Pessoais', 'Endereço e Contato', 'Batismo e Congregação', 'Consagrações'];
-        console.log(completeStatus);
         return labels.filter((f, index) => {
-            console.log(f);
-            console.log(completeStatus[index]);
-            console.log('---------');
             return completeStatus[index] == false;
         });
     }
@@ -44,20 +52,30 @@ export default function FormFinalizacao({data, completeStatus}) {
                         )}                            
                     </Alert>
                 }
-                <Paper elevation={3} sx={{padding: '1em', marginTop: '.5em'}}>                                    
-                    <Grid container spacing={2} columns={11} >
+                <Paper elevation={3} sx={
+                    {
+                        padding: '1em', 
+                        marginTop: '.5em'
+                    }}>   
                         {completeStatus[0] &&
-                            <Grid item xs={12} md={12}>
+                            <>        
+                                <img src={preview34} width="200" height="266" 
+                                    style={{
+                                        float: 'left',
+                                        margin: '0 1em 0 0'
+                                    }}
+                                ></img>                                                   
                                 <Typography variant="h6">
                                     Dados Pessoais:
                                 </Typography>                            
                                 <Typography variant="span" component='p'>
-                                    <b style={{textTransform: 'capitalize'}}>{data.dadosPessoais.nome}</b> nascido em <b>{data.dadosPessoais.dataNasc}</b> sob o CPF  de número <b>{data.dadosPessoais.cpf}</b> e RG <b>{data.dadosPessoais.rg}</b> emitido na unidade federativa (UF) <b>{data.dadosPessoais.rgUf}</b>
+                                    <b style={{textTransform: 'capitalize'}}>{data.dadosPessoais.nome}</b> do sexo <span style={{textTransform: 'capitalize'}}>{data.dadosPessoais.sexo}</span>, nascido(a) em <b>{data.dadosPessoais.dataNasc}</b> sob o CPF  de número <b>{data.dadosPessoais.cpf}</b> e RG <b>{data.dadosPessoais.rg}</b> emitido na unidade federativa (UF) <b>{data.dadosPessoais.rgUf}</b>
                                 </Typography>
-                            </Grid>
+                                <Divider/>                                    
+                            </>
                         }
                         {completeStatus[1] &&
-                            <Grid item xs={12} md={12}>
+                            <>
                                 <Typography variant="h6">
                                     Endereço e Contato: 
                                 </Typography>
@@ -70,10 +88,11 @@ export default function FormFinalizacao({data, completeStatus}) {
                                 <Typography variant="p" component='p'>
                                     Telefone: {data.dadosEnderecoContato.telefone}
                                 </Typography>
-                            </Grid>
+                                <Divider/>
+                            </>
                         }                     
-                        {completeStatus[2] &&                         
-                            <Grid item xs={12} md={12}>
+                        {completeStatus[2] && 
+                            <>
                                 <Typography variant="h6">
                                     Batismo e Congregação: 
                                 </Typography>
@@ -83,9 +102,9 @@ export default function FormFinalizacao({data, completeStatus}) {
                                 <Typography variant="p" component='p'>
                                     Batizado em <b>{data.dadosCongregacaoBatismo.dataBatismo}</b> na igreja <b>{(data.dadosCongregacaoBatismo.localBatismo == 'self' ? 'AD Toyama' : data.dadosCongregacaoBatismo.localBatismo)}</b>
                                 </Typography>
-                            </Grid>
-                        }
-                        <Grid item xs={12} md={12}>                                                
+                                <Divider/>
+                            </>             
+                        }                                             
                             <Typography variant="h6">
                                 Cargos e Consagrações: 
                             </Typography>
@@ -102,8 +121,10 @@ export default function FormFinalizacao({data, completeStatus}) {
                                 Não foram lançados cargos.
                             </Typography>                        
                             }
-                        </Grid>
-                    </Grid>
+                    <Divider/>
+                    <Box sx={{width: '100%', display: 'flex', alignContent: 'center', justifyContent: 'center', marginTop: '1em'}}>
+                        <Button variant="contained" color="secondary" onClick={onUpload}>Enviar dados e cadastrar</Button>
+                    </Box>
                 </Paper>   
             </Box>
         </Grow>

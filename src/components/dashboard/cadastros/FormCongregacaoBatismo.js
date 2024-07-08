@@ -1,10 +1,12 @@
-import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Grow, Radio, RadioGroup, Slide, TextField, Typography } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { Autocomplete, FormControl, FormControlLabel, FormLabel, Grid, Grow, Radio, RadioGroup, Slide, TextField, ThemeProvider, Typography, createTheme } from "@mui/material";
+import { DatePicker, LocalizationProvider, ptBR } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import ImagemCropUplaod from "../../helpers/ImagemCropUplaod";
 import { sa_getCongregacoes, sa_getGrupos } from "../../../app/actions/helpers";
+import 'dayjs/locale/pt-br'
+
 
 export default function FormCongregacaoBatismo({data, setData}) {
     const [dataForm, setDataForm] = useState(data ?? {
@@ -126,8 +128,8 @@ export default function FormCongregacaoBatismo({data, setData}) {
                             </Typography>
                         </Grid>                       
                         <Grid item xs={6} md={4}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker sx={{ width: '100%' }} label="Data de Batismo" onChange={handleDatePickOnChange} name="dataBatismo" value={dayjs(dataForm.dataBatismo, 'DD/MM/YYYY')}/>
+                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+                                <DatePicker maxDate={dayjs()} sx={{ width: '100%' }} label="Data de Batismo" onChange={handleDatePickOnChange} name="dataBatismo" value={dayjs(dataForm.dataBatismo, 'DD/MM/YYYY')}/>
                             </LocalizationProvider>
                         </Grid>                     
                         <Grid item xs={12} md={6}>

@@ -19,21 +19,26 @@ export default function FormEnderecoContato({data, setData}) {
     });
 
     const [StatesAndCities, setStatesAndCities] = useState([]);
+    const [states, setStates] = useState([]);
     const [SelectedState, setSelectedState] = useState(null);
     const [addressFound, setAddressFound] = useState(false);
     const [readOnly, setReadonly] = useState(true);
 
     useEffect(() => {
         setData(dataForm);
+        console.log(states);
     }, [dataForm]);
 
     useEffect(() => {        
         (async ()=>{
             let response = await sa_getStateAndCities(); 
             let temp_states = [];
+            let states = [];
             response.data.map((st => {
-                temp_states[st.uf] = st['cities'].map(ct => ct.name);
+                states[st.uf] = {'label': st.name, 'id': st.uf};
+                temp_states[st.uf] = st['cities'].map(ct => ({'label': ct.name, 'id': ct.id}));
             }))
+            setStates(states);
             setStatesAndCities(temp_states);
             if(dataForm.estado != '' && dataForm.estado != null)
                 setSelectedState(dataForm.estado);
@@ -49,10 +54,10 @@ export default function FormEnderecoContato({data, setData}) {
     }
 
     const handleStateChange = (e, o) => {
-        setSelectedState(o);
+        setSelectedState(o.id);
         setDataForm((prevData) => ({
             ...prevData,
-            estado: o,
+            estado: o.id,
         }));
     }
 
@@ -167,10 +172,10 @@ export default function FormEnderecoContato({data, setData}) {
                             <Autocomplete
                             disablePortal
                             id="combo-box-demo"
-                            options={Object.keys(StatesAndCities)}
+                            options={Object.values(states)}
                             sx={{ width: '100%' }}
                             onChange={handleStateChange}
-                            value={dataForm.uf}
+                            value={states[dataForm.uf]}
                             disabled={!dataForm.inexistentCep}
                             required
                             renderInput={(params) => <TextField {...params} label="Estado" fullWidth name="estado"value={dataForm.estado}/>}                        

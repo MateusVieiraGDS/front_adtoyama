@@ -5,6 +5,7 @@ import ImagemCropUplaod from "../../helpers/ImagemCropUplaod";
 import { Delete } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import 'dayjs/locale/pt-br'
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 export default function FormConsagracao({data, setData}) {
@@ -137,8 +138,8 @@ export default function FormConsagracao({data, setData}) {
                                         </RadioGroup>
                                     </Grid>
                                     <Grid item xs={6} md={4}>
-                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker sx={{ width: '100%' }} label="Data de Consagração" onChange={(dt) => {handleDatePickOnChange(index, dt)}} name="dataBatismo" value={dayjs(consagracoes[index].dataCon, 'DD/MM/YYYY')}/>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+                                            <DatePicker maxDate={dayjs()} sx={{ width: '100%' }} label="Data de Consagração" onChange={(dt) => {handleDatePickOnChange(index, dt)}} name="dataBatismo" value={dayjs(consagracoes[index].dataCon, 'DD/MM/YYYY')}/>
                                         </LocalizationProvider>
                                     </Grid> 
                                     {consagracoes[index].ministerio != 'self' &&

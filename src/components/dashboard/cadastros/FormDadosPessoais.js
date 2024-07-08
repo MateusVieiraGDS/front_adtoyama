@@ -20,6 +20,7 @@ export default function FormDadosPessoais({ data, setData}) {
     const [dataForm, setDataForm] = useState(data ?? {
         nome: '',
         dataNasc: '',
+        sexo: '',
         cpf: '',
         rg: '',
         rgUf: '',
@@ -27,37 +28,49 @@ export default function FormDadosPessoais({ data, setData}) {
         cidade: '',
         nomeMae: '',
         nomePai: '',
+        imageFile34: null,
         imageFileDoc: null,
-        imageFileNasc: null
+        imageFileNasc: null,
+        imageFileCas: null,
+        imageFileDiv: null,
+        imageFileObt: null
     });
 
     useEffect(() => {
         setData(dataForm);
+        setValueState(states[dataForm.estado]);
     }, [dataForm]);
 
+    const [states, setStates] = useState([]);
+    const [valueState, setValueState] = useState(null);
     const [StatesAndCities, setStatesAndCities] = useState([]);
     const [SelectedState, setSelectedState] = useState(null);
+    const [estadosCivis, setEstadosCivis] = useState(['Solteiro', 'Casado', 'Divorciado', 'Viuvo']);
 
     useEffect(() => {        
         (async ()=>{
             let response = await sa_getStateAndCities(); 
             let temp_states = [];
-            console.log(response);
+            let states = [];
             response.data.map((st => {
-                temp_states[st.uf] = st['cities'].map(ct => ct.name);
+                states[st.uf] = {'label': st.name, 'id': st.uf};
+                temp_states[st.uf] = st['cities'].map(ct => ({'label': ct.name, 'id': ct.id}));
             }))
+            setStates(states);
             setStatesAndCities(temp_states);
-            if(dataForm.estado != '' && dataForm.estado != null)
+            if(dataForm.estado != '' && dataForm.estado != null){
                 setSelectedState(dataForm.estado);
+                setValueState(states[dataForm.estado]);
+            }
         })();
     }, []);
 
 
     const handleStateChange = (e, o) => {
-        setSelectedState(o);
+        setSelectedState(o.id);
         setDataForm((prevData) => ({
             ...prevData,
-            estado: o,
+            estado: o.id,
         }));
     }
 
@@ -90,20 +103,13 @@ export default function FormDadosPessoais({ data, setData}) {
             cidade: o,
         }));
     }
-
-    const handleChangeImageDoc= (image) => {
+    
+    const handleChangeImage = (image, key) => {
         setDataForm((prevData) => ({
             ...prevData,
-            imageFileDoc: image[0]??null,
+            [key]: image[0]??null,
         }));
-    } 
-
-    const handleChangeImageNasc= (image) => {
-        setDataForm((prevData) => ({
-            ...prevData,
-            imageFileNasc: image[0]??null,
-        }));
-    } 
+    }
 
     const handleChangeSexo = (e, v) => {
         setDataForm((prevData) => ({
@@ -112,9 +118,39 @@ export default function FormDadosPessoais({ data, setData}) {
         }));
     };
 
+    const handleChangeEstadoCivil = (e, v) => {
+        let obj = {};
+        switch(v) {
+            case 'Casado':
+                obj = {
+                    imageFileDiv: null,
+                    imageFileObt: null
+                }
+            break;
+            case 'Divorciado':
+                obj = {imageFileObt: null}
+            break;
+            case 'Viuvo':
+                obj = {imageFileDiv: null}
+            break;
+            default:
+                obj = {
+                    imageFileCas: null,
+                    imageFileDiv: null,
+                    imageFileObt: null
+                }
+            break;
+        }
+        setDataForm((prevData) => ({
+            ...prevData,
+            estadoCivil: v,
+            ...obj
+        }));
+    };
+
     return ( 
         <Grow in={true} direction="left">
-            <FormControl>
+            <FormControl sx={{width: '100%'}}>
                     <Grid container spacing={2} columns={11}>
                         <Grid item xs={12} md={12}>
                             <Typography variant="span" gutterBottom>
@@ -150,7 +186,7 @@ export default function FormDadosPessoais({ data, setData}) {
                             required
                             disablePortal
                             id="combo-box-demo"
-                            options={Object.keys(StatesAndCities)}
+                            options={Object.keys(states)}
                             sx={{ width: '100%' }}
                             onChange={handleChangeRgUf}
                             value={dataForm.rgUf}
@@ -158,8 +194,8 @@ export default function FormDadosPessoais({ data, setData}) {
                             />
                         </Grid> 
                         <Grid item xs={6} md={2}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker required sx={{ width: '100%' }} label="Data de Nascimento" onChange={handleDatePickOnChange} name="dataNasc" value={dayjs(dataForm.dataNasc, 'DD/MM/YYYY')}/>
+                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
+                                <DatePicker required sx={{ width: '100%' }} label="Data de Nascimento" onChange={handleDatePickOnChange} name="dataNasc" value={dayjs(dataForm.dataNasc, 'DD/MM/YYYY')} maxDate={dayjs()}/>
                             </LocalizationProvider>
                         </Grid>                         
                         <Grid item xs={12} md={5}>
@@ -178,10 +214,10 @@ export default function FormDadosPessoais({ data, setData}) {
                             required
                             disablePortal
                             id="combo-box-demo"
-                            options={Object.keys(StatesAndCities)}
+                            options={Object.values(states)}
                             sx={{ width: '100%' }}
                             onChange={handleStateChange}
-                            value={dataForm.estado}
+                            value={valueState}
                             renderInput={(params) => <TextField {...params} label="Estado" fullWidth name="estado"value={dataForm.estado}/>}                        
                             />
                         </Grid>
@@ -198,14 +234,53 @@ export default function FormDadosPessoais({ data, setData}) {
                             noOptionsText={"Selecione o Estado"}            
                             />
                         </Grid>
+                        <Grid item md={8} xs={12}>
+                            <FormLabel id="demo-row-radio-buttons-group-label">Foto 3x4</FormLabel>
+                            <ImagemCropUplaod initialAspectRatio={3/4} images={dataForm.imageFile34 != null ? [dataForm.imageFile34] : []} setImages={ img => handleChangeImage(img, 'imageFile34')}/>
+                        </Grid>
+                        <Grid item xs={12} md={12}>
+                            <Typography variant="span" gutterBottom>
+                                Estado Civil
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={4} md={2}>
+                            <Autocomplete
+                            required
+                            disablePortal
+                            id="combo-box-demo"
+                            options={estadosCivis}
+                            sx={{ width: '100%' }}
+                            onChange={handleChangeEstadoCivil}
+                            value={dataForm.estadoCivil}
+                            renderInput={(params) => <TextField {...params} label="Estado Civil" fullWidth name="estadoCivil"value={dataForm.estadoCivil}/>}                        
+                            />
+                        </Grid>
                         <Grid item xs={5}/>
+                        {[null, undefined, '', 'Solteiro'].includes(dataForm.estadoCivil) == false &&
+                            <Grid item md={8} xs={12}>
+                                <FormLabel id="demo-row-radio-buttons-group-label">Foto da Certidão de Casamento</FormLabel>
+                                <ImagemCropUplaod images={dataForm.imageFileCas != null ? [dataForm.imageFileCas] : []} setImages={ img => handleChangeImage(img, 'imageFileCas')}/>
+                            </Grid>
+                        }
+                        {dataForm.estadoCivil == 'Divorciado' &&
+                            <Grid item md={8} xs={12}>
+                                <FormLabel id="demo-row-radio-buttons-group-label">Foto da Certidão de Divórcio</FormLabel>
+                                <ImagemCropUplaod images={dataForm.imageFileDiv != null ? [dataForm.imageFileDiv] : []} setImages={ img => handleChangeImage(img, 'imageFileDiv')}/>
+                            </Grid>
+                        }
+                        {dataForm.estadoCivil == 'Viuvo' &&
+                            <Grid item md={8} xs={12}>
+                                <FormLabel id="demo-row-radio-buttons-group-label">Foto da Certidão de Óbito</FormLabel>
+                                <ImagemCropUplaod images={dataForm.imageFileObt != null ? [dataForm.imageFileObt] : []} setImages={ img => handleChangeImage(img, 'imageFileObt')}/>
+                            </Grid>
+                        }                        
                         <Grid item md={8} xs={12}>
                             <FormLabel id="demo-row-radio-buttons-group-label">Foto do Documento (Identidade ou CNH)</FormLabel>
-                            <ImagemCropUplaod images={dataForm.imageFileDoc != null ? [dataForm.imageFileDoc] : []} setImages={handleChangeImageDoc}/>
+                            <ImagemCropUplaod images={dataForm.imageFileDoc != null ? [dataForm.imageFileDoc] : []} setImages={ img => handleChangeImage(img, 'imageFileDoc')}/>
                         </Grid>
                         <Grid item md={8} xs={12}>
                             <FormLabel id="demo-row-radio-buttons-group-label">Foto da Certidão de Nascimento</FormLabel>
-                            <ImagemCropUplaod images={dataForm.imageFileNasc != null ? [dataForm.imageFileNasc] : []} setImages={handleChangeImageNasc}/>
+                            <ImagemCropUplaod images={dataForm.imageFileNasc != null ? [dataForm.imageFileNasc] : []} setImages={ img => handleChangeImage(img, 'imageFileNasc')}/>
                         </Grid>
                     </Grid> 
             </FormControl>
