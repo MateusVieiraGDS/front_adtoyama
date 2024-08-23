@@ -36,17 +36,17 @@ export default function FormDadosPessoais({ data, setData}) {
         imageFileObt: null
     });
 
-    useEffect(() => {
-        setData(dataForm);
-        setValueState(states[dataForm.estado]);
-    }, [dataForm]);
-
     const [states, setStates] = useState([]);
     const [valueState, setValueState] = useState(null);
+    const [valueCity, setValueCity] = useState(null);
     const [StatesAndCities, setStatesAndCities] = useState([]);
     const [SelectedState, setSelectedState] = useState(null);
     const [estadosCivis, setEstadosCivis] = useState(['Solteiro', 'Casado', 'Divorciado', 'Viuvo']);
 
+    useEffect(() => {
+        setData(dataForm);        
+    }, [dataForm]);
+    
     useEffect(() => {        
         (async ()=>{
             let response = await sa_getStateAndCities(); 
@@ -62,12 +62,15 @@ export default function FormDadosPessoais({ data, setData}) {
                 setSelectedState(dataForm.estado);
                 setValueState(states[dataForm.estado]);
             }
+            if(dataForm.cidade != '' && dataForm.cidade != null)
+                setValueCity(temp_states[dataForm.estado].find(ct => ct.id == dataForm.cidade));
         })();
     }, []);
 
 
     const handleStateChange = (e, o) => {
         setSelectedState(o.id);
+        setValueState(o);
         setDataForm((prevData) => ({
             ...prevData,
             estado: o.id,
@@ -98,9 +101,10 @@ export default function FormDadosPessoais({ data, setData}) {
     }
 
     const handleChangeCidade= (e, o) => {
+        setValueCity(o);
         setDataForm((prevData) => ({
             ...prevData,
-            cidade: o,
+            cidade: o.id,
         }));
     }
     
@@ -167,6 +171,7 @@ export default function FormDadosPessoais({ data, setData}) {
                                 aria-labelledby="demo-row-radio-buttons-group-label"
                                 name="row-radio-buttons-group"
                                 onChange={handleChangeSexo}
+                                value={dataForm.sexo}
                             >
                                 <FormControlLabel value="MASCULINO" control={<Radio />} label="Masculino" />
                                 <FormControlLabel value="FEMININO" control={<Radio />} label="Feminino" />
@@ -228,7 +233,7 @@ export default function FormDadosPessoais({ data, setData}) {
                             id="combo-box-demo"
                             options={SelectedState != null ? StatesAndCities[SelectedState] : []}                        
                             sx={{ width: '100%' }}
-                            value={dataForm.cidade}
+                            value={valueCity}
                             onChange={handleChangeCidade}                            
                             renderInput={(params) => <TextField {...params} label="Cidade" fullWidth name="cidade"value={dataForm.cidade}/>}
                             noOptionsText={"Selecione o Estado"}            

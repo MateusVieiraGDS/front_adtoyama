@@ -18,15 +18,15 @@ export default function FormEnderecoContato({data, setData}) {
         inexistentCep: false
     });
 
+    const [valueState, setValueState] = useState(null);
+    const [valueCity, setValueCity] = useState(null);
     const [StatesAndCities, setStatesAndCities] = useState([]);
     const [states, setStates] = useState([]);
     const [SelectedState, setSelectedState] = useState(null);
     const [addressFound, setAddressFound] = useState(false);
-    const [readOnly, setReadonly] = useState(true);
 
     useEffect(() => {
         setData(dataForm);
-        console.log(states);
     }, [dataForm]);
 
     useEffect(() => {        
@@ -40,8 +40,12 @@ export default function FormEnderecoContato({data, setData}) {
             }))
             setStates(states);
             setStatesAndCities(temp_states);
-            if(dataForm.estado != '' && dataForm.estado != null)
+            if(dataForm.estado != '' && dataForm.estado != null){
                 setSelectedState(dataForm.estado);
+                setValueState(states[dataForm.estado]);
+            }
+            if(dataForm.cidade != '' && dataForm.cidade != null)
+                setValueCity(temp_states[dataForm.estado].find(ct => ct.id == dataForm.cidade));
         })();
     }, []);
 
@@ -55,16 +59,18 @@ export default function FormEnderecoContato({data, setData}) {
 
     const handleStateChange = (e, o) => {
         setSelectedState(o.id);
+        setValueState(o);
         setDataForm((prevData) => ({
             ...prevData,
-            estado: o.id,
+            uf: o.id,
         }));
     }
 
     const handleChangeCidade= (e, o) => {
+        setValueCity(o);
         setDataForm((prevData) => ({
             ...prevData,
-            cidade: o,
+            cidade: o.id,
         }));
     }
 
@@ -87,16 +93,20 @@ export default function FormEnderecoContato({data, setData}) {
                 responseData = null;
         }
         
-        if(responseData != null){
+        if(responseData != null){            
+            setSelectedState(responseData.uf);
+            setValueState(states[responseData.uf]);
+            let city = StatesAndCities[responseData.uf].find(ct => ct.label == responseData.localidade);
+            setValueCity(city);
+
             setDataForm((prevData) => ({
                 ...prevData,
                 rua: responseData.logradouro,            
                 bairro: responseData.bairro,
-                cidade: responseData.localidade,
+                cidade: city.id,
                 uf: responseData.uf,
                 inexistentCep: false
             }));
-            setSelectedState(responseData.uf);
         }
         else
             setDataForm((prevData) => ({
@@ -175,7 +185,7 @@ export default function FormEnderecoContato({data, setData}) {
                             options={Object.values(states)}
                             sx={{ width: '100%' }}
                             onChange={handleStateChange}
-                            value={states[dataForm.uf]}
+                            value={valueState}
                             disabled={!dataForm.inexistentCep}
                             required
                             renderInput={(params) => <TextField {...params} label="Estado" fullWidth name="estado"value={dataForm.estado}/>}                        
@@ -187,7 +197,7 @@ export default function FormEnderecoContato({data, setData}) {
                             id="combo-box-demo"
                             options={SelectedState != null ? StatesAndCities[SelectedState] : []}                        
                             sx={{ width: '100%' }}
-                            value={dataForm.cidade}
+                            value={valueCity}
                             onChange={handleChangeCidade}  
                             disabled={!dataForm.inexistentCep}
                             required                          

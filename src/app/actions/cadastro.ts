@@ -4,22 +4,27 @@ import { ParameterizeResponse, ParameterizedResponse, fetchApi } from "./Laravel
 
 
 export async function sa_uploadCadastro(data: FormData): Promise<Partial<ParameterizedResponse>> {
-    //console.log(data);
+    const newFormData = new FormData();
+    data.forEach((value, key) => {
+        const newKey = key.replace(/ARRAY\[(\d+)\]/g, 'ARRAY_$1');
+        newFormData.append(newKey, value);
+    });
+    data = newFormData;
+
     let response = await fetchApi(
         '/NovoCadastro',
         {
             body: data,
             cache: 'no-store',
             method: 'POST'
-        }
+        },
+        false
     );
     
-    if (response.success){ 
-        console.log(response);       
-        return ParameterizeResponse(true, null);
+    if (response.success){     
+        return ParameterizeResponse(true, response.data);
     }
-    console.log(response);
     if(response.errors['ServerError'])        
-        return ParameterizeResponse(false, {"ServerError": "Desculpe! Não foi possível realizar o login, tente mais tarde."});
-    
+        return ParameterizeResponse(false, {"ServerError": "Desculpe! Não foi possível realizar o cadastro, tente mais tarde."});
+    return response;    
 }

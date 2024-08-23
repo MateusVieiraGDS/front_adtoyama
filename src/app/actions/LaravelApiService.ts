@@ -5,7 +5,7 @@ export const COOKIE_TOKEN_NAME = 'AD-TK';
 export const API_SERVER_ENDPOINT = 'http://localhost/api';
 
 /*FETECH NEXTJS EXTENDS API SERVICE - CONFIG ------------------------------------------*/
-export const fetchApi = async (url: string, options: RequestInit): Promise<Partial<ParameterizedResponse>> => {   
+export const fetchApi = async (url: string, options: RequestInit, isBodyJson: boolean = true): Promise<Partial<ParameterizedResponse>> => {   
     let url_final = null; 
     try{
         url_final = new URL(url);
@@ -16,15 +16,15 @@ export const fetchApi = async (url: string, options: RequestInit): Promise<Parti
     const payload_headers = new Headers();
     let jwt = await getAuthToken();
     payload_headers.append('Authorization', jwt);
-    payload_headers.append('Content-Type', 'application/json');
     payload_headers.append('LAPI-KEY', process.env.LARAVEL_API_KEY);
     payload_headers.append('Accept', 'application/json');
     payload_headers.append('x-forwarded-for', headers().get('x-forwarded-for'));
+
+    if(isBodyJson)
+        payload_headers.append('Content-Type', 'application/json');
+
     Object.entries(options.headers || {}).map((pair) => {
-        if(payload_headers.has(pair[0]))
         payload_headers.set(pair[0], pair[1]);
-        else 
-        payload_headers.append(pair[0], pair[1]);
     });
 
     let jsonResponse: object = null;
@@ -33,7 +33,7 @@ export const fetchApi = async (url: string, options: RequestInit): Promise<Parti
         response = await fetch(url_final.href, {
             ...options,
             headers: payload_headers
-        });
+        });        
         jsonResponse = await response.json();  
         if(!response.ok)
             return ParameterizeResponse(false, refactorLaravelError(jsonResponse['errors']));

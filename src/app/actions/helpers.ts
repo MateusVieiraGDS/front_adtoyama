@@ -5,7 +5,7 @@ import { ParameterizeResponse, ParameterizedResponse, fetchApi } from "./Laravel
 export async function sa_getStateAndCities(): Promise<Partial<ParameterizedResponse>> {
     let response = await fetchApi('/StateAndCities', { method: 'GET', cache: 'no-cache'});
     if (response.success){        
-        console.log(response.data);
+        //console.log(response.data);
         return ParameterizeResponse(true, response.data);
     }
 

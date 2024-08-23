@@ -82,6 +82,7 @@ export default function CadastroForm() {
     }
     
     useEffect(() => {
+        console.log(dataPayload);
     }, [dataPayload]);
 
     useEffect(() => {
@@ -145,6 +146,7 @@ export default function CadastroForm() {
             return;
         }
         let response = await sa_uploadCadastro(ObjetcToFormData(dataPayload));
+        console.log(response);
     }
 
     const steps = [
